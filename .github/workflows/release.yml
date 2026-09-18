@@ -1,0 +1,38 @@
+name: Release and Deploy Workflow
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+
+  build-and-deploy:
+
+    name: Detectar versão e publicar na Vercel
+
+    runs-on: ubuntu-latest
+
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+
+      - name: Checkout do repositório
+        uses: actions/checkout@v5
+
+      - name: Mostrar versão
+        run: echo "Publicando versão ${GITHUB_REF_NAME}"
+
+      - name: Instalar Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Obter configurações da Vercel
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Gerar build do projeto
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy para Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
